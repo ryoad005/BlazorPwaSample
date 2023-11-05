@@ -1,0 +1,78 @@
+﻿
+@page "/取引"
+@inject HttpClient Http
+@using BlazorPwaSample.Shared
+@using AntDesign
+@using BlazorPwaSample.Shared.Models;
+
+@if (t_取引 == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (取引会社リスト == null || !取引会社リスト.Any())
+{
+    <p><em>取引会社リストを読み込めませんでした。</em></p>
+}
+else if (銘柄リスト == null || !銘柄リスト.Any())
+{
+    <p><em>銘柄リストを読み込めませんでした。</em></p>
+}
+else
+{
+    <table class="table table-striped table-bordered table-hover table-responsive">
+        <thead>
+            <tr>
+                <th>取引会社</th>
+                <th>銘柄</th>
+                <th>日付</th>
+                 <th>数量</th>
+                <th>建値</th>
+                <th>決済値</th>
+                <th>損益</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var 取引 in t_取引)
+            {
+                <tr>
+                    <td>
+                        <select @bind="取引.取引会社">
+                            @foreach (var 会社 in 取引会社リスト)
+                            {
+                                <option value="@会社.会社コード">@会社.会社名</option>
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        <select @bind="取引.銘柄">
+                            @foreach (var 銘柄 in 銘柄リスト)
+                            {
+                                <option value="@銘柄.銘柄コード">@銘柄.銘柄名</option>
+                            }
+                        </select>
+                    </td>
+                    <td><input type="date" @bind="取引.日付" class="form-control" /></td>
+                    <td class="text-right"><input type="number" @bind="取引.数量" class="form-control" style="text-align: right;" /></td>
+                    <td class="text-end"><input type="number" @bind="取引.建値" class="form-control" style="text-align: right;" /></td>
+                    <td class="text-end"><input type="number" @bind="取引.決済値" class="form-control" style="text-align: right;" /></td>
+                    <td class="text-end"><input type="number" @bind="取引.損益" class="form-control" style="text-align: right;" /></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+                
+
+@code {
+    private List<T_取引>? t_取引;   
+    private List<T_FX会社>? 取引会社リスト; // このリストには会社が含まれるべきです。
+    private List<T_銘柄>? 銘柄リスト; // このリストには会社が含まれるべきです。
+
+    protected override async Task OnInitializedAsync()
+    {
+        t_取引 = await Http.GetFromJsonAsync<List<T_取引>>("api/T_取引");
+        取引会社リスト = await Http.GetFromJsonAsync<List<T_FX会社>>("api/T_FX会社"); // このリストを取得するためのAPIエンドポイントがあると仮定します。
+        銘柄リスト = await Http.GetFromJsonAsync<List<T_銘柄>>("api/T_銘柄"); 
+    }
+}
